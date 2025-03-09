@@ -102,6 +102,7 @@ class SudokuUI {
     // Board updated event
     this.game.on('boardUpdated', () => {
       this.renderBoard();
+      this.updateNumberButtonStates(); // Add this line
     });
     
     // Cell selected event
@@ -165,6 +166,9 @@ class SudokuUI {
     if (this.game.selectedCell) {
       this.highlightCell(this.game.selectedCell[0], this.game.selectedCell[1]);
     }
+
+    // Add at the end of renderBoard
+    this.updateNumberButtonStates();
   }
 
   /**
@@ -179,6 +183,8 @@ class SudokuUI {
       cell.classList.remove('selected');
       cell.classList.remove('highlighted');
       cell.classList.remove('same-value');
+      // Reset text color back to default
+      cell.style.color = '';
     });
     
     // Get the index of the selected cell in the flat array
@@ -215,6 +221,8 @@ class SudokuUI {
           if (this.game.board[r][c] === selectedValue) {
             const index = r * 9 + c;
             cells[index].classList.add('same-value');
+            // Set text color to yellow for cells with the same value
+            cells[index].style.color = 'yellow';
           }
         }
       }
@@ -305,5 +313,27 @@ class SudokuUI {
     setTimeout(() => {
       cell.classList.remove('hint');
     }, 2000);
+  }
+
+  /**
+   * Update number button states based on their usage count
+   */
+  updateNumberButtonStates() {
+    // Count occurrences of each number
+    const counts = new Array(10).fill(0);
+    for (let row = 0; row < 9; row++) {
+      for (let col = 0; col < 9; col++) {
+        const value = this.game.board[row][col];
+        if (value !== 0) {
+          counts[value]++;
+        }
+      }
+    }
+    
+    // Update button states
+    this.numberButtons.forEach(button => {
+      const number = parseInt(button.dataset.number, 10);
+      button.disabled = counts[number] >= 9;
+    });
   }
 }
